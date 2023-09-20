@@ -9,6 +9,8 @@
 	padding: 0;
 	margin: 0;
 	box-sizing: border-box;
+	
+	scroll-behavior: snap;
 }
 
 /**
@@ -227,7 +229,7 @@ button::-moz-focus-inner,
 [type='button']::-moz-focus-inner,
 [type='reset']::-moz-focus-inner,
 [type='submit']::-moz-focus-inner {
-	border-style: none
+	border-style: none;
 	padding: 0;
 }
 
