@@ -1,52 +1,29 @@
-const data = require("./Project.json");
+const actualData = require("./savedata.json");
+
+const additionalData = require("./finalData.json");
 
 
-const countries = require("./countries.json");
-
-
-
-// console.log(countries);
-const newData = [];
+const fs = require("fs");
 
 
 
-// [
-//     {
-//         ...,
-//         Country: "usa",
-//         airQ
-//     },
-//     {
-//         ..,
-//         Country: "usa"
-//     }
-// ]
+function forEach(countryObject) {
 
-function eachElement(country) {
+    const countryName = countryObject.country;
 
-    const countryObject = data.filter(element => element.Country === country);
 
-    let airQualityAverage = 0;
-    let waterPollutionAverage = 0;
-
-    countryObject.forEach(obj => {
-        airQualityAverage += parseFloat(obj.AirQuality);
-        waterPollutionAverage += parseFloat(obj.WaterPollution);
-    });
-
-    airQualityAverage /= countryObject.length;
-    waterPollutionAverage /= countryObject.length;
-
-    const newCountryObject = {
-        country,
-        airQualityAverage,
-        waterPollutionAverage,
+    
+    const object = actualData.features.find(objectCountry => objectCountry.properties.ADMIN === countryName);
+    
+    
+    if(object) { 
+        object.properties.airQualityAverage  = countryObject.airQualityAverage;
+        object.properties.waterPollutionAverage  = countryObject.waterPollutionAverage;
     }
-
-    newData.push(newCountryObject);
-
 }
 
-countries.forEach(eachElement);
 
-console.log(newData);
+
+additionalData.forEach(forEach);
+
+fs.writeFileSync("./save.json", JSON.stringify(actualData),  'utf-8');
