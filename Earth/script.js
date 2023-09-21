@@ -5,22 +5,10 @@ const countries = require("./countries.json");
 
 
 
-// console.log(countries);
 const newData = [];
 
 
 
-// [
-//     {
-//         ...,
-//         Country: "usa",
-//         airQ
-//     },
-//     {
-//         ..,
-//         Country: "usa"
-//     }
-// ]
 
 function eachElement(country) {
 
