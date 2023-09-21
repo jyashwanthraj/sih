@@ -9,18 +9,22 @@
 
 <body>
   <div id="globeViz"></div>
+  <div id="globeViz2" class="hidden"></div>
 
   <script>
     const colorScale = d3.scaleSequentialSqrt(d3.interpolateYlOrRd);
 
     // GDP per capita (avoiding countries with small pop)
     // const getVal = feat => feat.properties.GDP_MD_EST + 330 ;
-    const getVal = feat => feat.properties.pscore / Math.max(1e5, feat.properties.POP_EST);
+    const getVal = feat => (feat.properties.airQualityAverage?? 0);
 
-    fetch('./savedata.json').then(res => res.json()).then(countries =>
+    fetch('./save.json').then(res => res.json()).then(countries =>
     {
-      const maxVal = Math.max(...countries.features.map(getVal));
-      colorScale.domain([0, maxVal]);
+      const maxVal = Math.max(...countries.features.map(getVal)) * 5;
+      const minVal = Math.min(...countries.features.map(getVal));
+
+      console.log({maxVal, minVal})
+      colorScale.domain([minVal, maxVal]);
 
       const world = Globe()
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
@@ -33,8 +37,8 @@
         .polygonStrokeColor(() => '#111')
         .polygonLabel(({ properties: d }) => `
           <b>${d.ADMIN} (${d.ISO_A2}):</b> <br />
-          Pollution Score: <i>${d.pscore}</i><br/>
-          Population: <i>${d.POP_EST}</i>
+          Air Quality: <i>${d.airQualityAverage}</i><br/>
+          Water Quality: <i>${ d.waterPollutionAverage }</i>
         `)
         .onPolygonHover(hoverD => world
           .polygonAltitude(d => d === hoverD ? 0.12 : 0.06)
@@ -43,5 +47,42 @@
         .polygonsTransitionDuration(300)
       (document.getElementById('globeViz'))
     });
+
+
+
+    const getVal2 = feat => (feat.properties.waterPollutionAverage?? 0);
+
+    fetch('./save.json').then(res => res.json()).then(countries =>
+    {
+      const maxVal = Math.max(...countries.features.map(getVal2)) * 5;
+      const minVal = Math.min(...countries.features.map(getVal2));
+
+      console.log({maxVal, minVal})
+      colorScale.domain([minVal, maxVal]);
+
+      const world = Globe()
+        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+        .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+        .lineHoverPrecision(0)
+        .polygonsData(countries.features.filter(d => d.properties.ISO_A2 !== 'AQ'))
+        .polygonAltitude(0.06)
+        .polygonCapColor(feat => colorScale(getVal2(feat)))
+        .polygonSideColor(() => 'rgba(0, 100, 0, 0.15)')
+        .polygonStrokeColor(() => '#111')
+        .polygonLabel(({ properties: d }) => `
+          <b>${d.ADMIN} (${d.ISO_A2}):</b> <br />
+          Air Quality: <i>${d.airQualityAverage}</i><br/>
+          Water Quality: <i>${ d.waterPollutionAverage }</i>
+        `)
+        .onPolygonHover(hoverD => world
+          .polygonAltitude(d => d === hoverD ? 0.12 : 0.06)
+          .polygonCapColor(d => d === hoverD ? 'steelblue' : colorScale(getVal2(d)))
+        )
+        .polygonsTransitionDuration(300)
+      (document.getElementById('globeViz2'))
+    });
+
+    
+  
   </script>
 </body>
