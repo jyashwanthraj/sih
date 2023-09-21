@@ -1,29 +1,108 @@
 <head>
-  <style> body { margin: 0; } </style>
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
 
   <script src="//unpkg.com/d3"></script>
 
   <script src="//unpkg.com/globe.gl"></script>
   <!--<script src="../../dist/globe.gl.js"></script>-->
+  <style>
+    .switch{
+      padding: 2rem;
+      position: absolute;
+      z-index: 100;
+      color: white
+    }
+    .toggle {
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .toggle-switch {
+      display: inline-block;
+      background: #ccc;
+      border-radius: 16px;
+      width: 58px;
+      height: 32px;
+      position: relative;
+      vertical-align: middle;
+      transition: background 0.25s;
+    }
+
+    .toggle-switch:before,
+    .toggle-switch:after {
+      content: "";
+    }
+
+    .toggle-switch:before {
+      display: block;
+      background: linear-gradient(to bottom, #fff 0%, #eee 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+      width: 24px;
+      height: 24px;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      transition: left 0.25s;
+    }
+
+    .toggle:hover .toggle-switch:before {
+      background: linear-gradient(to bottom, #fff 0%, #fff 100%);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+
+
+    .toggle-checkbox:checked+.toggle-switch:before {
+      left: 30px;
+    }
+
+    .toggle-checkbox {
+      position: absolute;
+      visibility: hidden;
+    }
+
+    .toggle-label {
+      margin-left: 5px;
+      position: relative;
+      top: 2px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
+
+  <div class="switch">
+    <label class="toggle">
+      <input class="toggle-checkbox" type="checkbox">
+      <div class="toggle-switch"></div>
+    </label>
+    <span class="toggle-label">
+      <p id="tag-label1">Air Quality Average</p>
+      <p id="tag-label2" class="hidden">Water Quality Average</p>
+    </span>
+  </div>
+
   <div id="globeViz"></div>
   <div id="globeViz2" class="hidden"></div>
 
   <script>
     const colorScale = d3.scaleSequentialSqrt(d3.interpolateYlOrRd);
 
-    // GDP per capita (avoiding countries with small pop)
-    // const getVal = feat => feat.properties.GDP_MD_EST + 330 ;
-    const getVal = feat => (feat.properties.airQualityAverage?? 0);
+    const getVal = feat => (feat.properties.airQualityAverage ?? 0);
 
-    fetch('./save.json').then(res => res.json()).then(countries =>
-    {
+    fetch('./save.json').then(res => res.json()).then(countries => {
       const maxVal = Math.max(...countries.features.map(getVal)) * 5;
       const minVal = Math.min(...countries.features.map(getVal));
 
-      console.log({maxVal, minVal})
+      console.log({ maxVal, minVal })
       colorScale.domain([minVal, maxVal]);
 
       const world = Globe()
@@ -36,28 +115,26 @@
         .polygonSideColor(() => 'rgba(0, 100, 0, 0.15)')
         .polygonStrokeColor(() => '#111')
         .polygonLabel(({ properties: d }) => `
-          <b>${d.ADMIN} (${d.ISO_A2}):</b> <br />
-          Air Quality: <i>${d.airQualityAverage}</i><br/>
-          Water Quality: <i>${ d.waterPollutionAverage }</i>
-        `)
+            <b>${d.ADMIN} (${d.ISO_A2}):</b> <br />
+            Air Quality: <i>${d.airQualityAverage}</i>
+          `)
         .onPolygonHover(hoverD => world
           .polygonAltitude(d => d === hoverD ? 0.12 : 0.06)
           .polygonCapColor(d => d === hoverD ? 'steelblue' : colorScale(getVal(d)))
         )
         .polygonsTransitionDuration(300)
-      (document.getElementById('globeViz'))
+        (document.getElementById('globeViz'))
     });
 
 
 
-    const getVal2 = feat => (feat.properties.waterPollutionAverage?? 0);
+    const getVal2 = feat => (feat.properties.waterPollutionAverage ?? 0);
 
-    fetch('./save.json').then(res => res.json()).then(countries =>
-    {
+    fetch('./save.json').then(res => res.json()).then(countries => {
       const maxVal = Math.max(...countries.features.map(getVal2)) * 5;
       const minVal = Math.min(...countries.features.map(getVal2));
 
-      console.log({maxVal, minVal})
+      console.log({ maxVal, minVal })
       colorScale.domain([minVal, maxVal]);
 
       const world = Globe()
@@ -70,19 +147,29 @@
         .polygonSideColor(() => 'rgba(0, 100, 0, 0.15)')
         .polygonStrokeColor(() => '#111')
         .polygonLabel(({ properties: d }) => `
-          <b>${d.ADMIN} (${d.ISO_A2}):</b> <br />
-          Air Quality: <i>${d.airQualityAverage}</i><br/>
-          Water Quality: <i>${ d.waterPollutionAverage }</i>
-        `)
+            <b>${d.ADMIN} (${d.ISO_A2}):</b> <br />
+            Water Quality: <i>${d.waterPollutionAverage}</i>
+          `)
         .onPolygonHover(hoverD => world
           .polygonAltitude(d => d === hoverD ? 0.12 : 0.06)
           .polygonCapColor(d => d === hoverD ? 'steelblue' : colorScale(getVal2(d)))
         )
         .polygonsTransitionDuration(300)
-      (document.getElementById('globeViz2'))
+        (document.getElementById('globeViz2'))
     });
 
+
+    const toggleSwitch = document.querySelector(".toggle-checkbox")
+    console.log(toggleSwitch)
+
     
-  
-  </script>
-</body>
+
+  toggleSwitch.addEventListener("change", () => {
+    document.getElementById('globeViz').classList.toggle("hidden");
+    document.getElementById('globeViz2').classList.toggle("hidden");
+    document.getElementById('tag-label1').classList.toggle("hidden");
+    document.getElementById('tag-label2').classList.toggle("hidden");
+  }
+  )
+</script>
+  </body>
