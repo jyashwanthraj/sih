@@ -1,9 +1,6 @@
-# sih
-
+# sih air and water quality tools 
 
 link : https://jyashwanthraj.github.io/sih/
-
-1.0 INTRODUCTION
 
 Protecting the atmospheric environment involves  control of atmospheric emissions as well as an understanding of pollutant dispersion, monitoring emission levels, i.e. concentration in ambient air.
 
